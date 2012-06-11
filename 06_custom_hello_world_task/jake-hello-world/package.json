@@ -1,0 +1,14 @@
+{
+  "author": {
+    "name": "Justin Wark",
+    "email": "justinwark@gmail.com"
+  },
+  "name": "jake-hello-world",
+  "version": "0.0.1",
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
