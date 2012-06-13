@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Jake</title>
+
+		<meta name="author" content="Justin Wark">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<link href='http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/main.css">
+		<link rel="stylesheet" href="css/print.css" type="text/css" media="print">
+
+		<link rel="stylesheet" href="lib/zenburn.css">
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Used to fade in a background when a specific slide state is reached -->
+			<div class="state-background"></div>
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+
+
+				<section>
+					<h1>Jake</h1>
+					<h2 class="inverted">JavaScript build tool in Node.js</h2>
+					<h3 class="inverted">&quot;Have your jake and eat it too!&quot;</h3>
+					<ul>
+						<li class="fragment">similar to Ruby's Rake</li>
+						<li class="fragment">useful for consolidating local build tasks (pre-commit checks, auto-test with growl, etc)</li>
+						<li class="fragment">... and CI tasks (tests, jshint, minification, etc)</li>
+					</ul>
+				</section>
+
+
+
+				<section>
+					<h3>Install Jake</h3>
+					<ul>
+						<li>Install Node &amp; NPM</li>
+						<li>Install Jake</li>
+					</ul>
+
+					<pre><code style="font-size: 18px; margin-top: 20px;">
+$ npm install jake -g
+					</code></pre>
+				</section>
+
+
+
+				<section>
+					<h3>Simple Jake Task</h3>
+					<pre><code style="font-size: 18px; margin-top: 20px;">
+desc('simple task');
+task('simple', function (params) {
+	console.log('my simple task');
+});
+					</code></pre>
+
+					<h3 class="fragment">list tasks</h3>
+					<pre class="fragment"><code style="font-size: 18px; margin-top: 20px;">
+$ jake -T
+					</code></pre>
+				</section>
+
+
+
+				<section>
+					<h3>dependent task</h3>
+					<pre><code style="font-size: 18px; margin-top: 20px;">
+desc('after simple task');
+task('after', ['simple'], function (params) {
+	console.log('after simple task');
+});
+					</code></pre>
+
+					<h3 class="fragment">namespacing tasks</h3>
+					<pre class="fragment"><code style="font-size: 18px; margin-top: 20px;">
+namespace('mytasks', function() {
+
+	desc('simple task');
+	task('simple', function (params) {
+		console.log('my simple task');
+	});
+
+	desc('after simple task');
+	task('after', ['simple'], function (params) {
+		console.log('after simple task');
+	});
+
+});
+					</code></pre>
+				</section>
+
+
+
+				<section>
+					<h3>asynchronous tasks</h3>
+					<pre><code style="font-size: 18px; margin-top: 20px;">
+desc('simple async task');
+task('async', function (params) {
+  console.log('async task starts');
+
+  setTimeout(function() {
+    console.log('async task complete');
+    complete();
+  }, 3000);
+
+  console.log('async task continues to work');
+}, {async: true});
+
+
+desc('simple task');
+task('simple', ['async'], function (params) {
+  console.log('simple task starts');
+});
+					</code></pre>
+				</section>
+
+
+
+				<section>
+					<h3>use pre-built tasks</h3>
+					<pre><code style="font-size: 18px; margin-top: 20px;">
+
+var minify = require('jake-uglify').minify;
+
+desc('minify my app files for the web')
+minify({'my-app-min.js':
+	[
+		'src/jquery.js',
+		'src/simple1.js',
+		'src/simple2.js'
+	]
+});
+					</code></pre>
+
+					<h3 class="fragment">first, install package using npm</h3>
+					<pre class="fragment"><code style="font-size: 18px; margin-top: 20px;">
+$ npm install jake-uglify
+					</code></pre>
+				</section>
+
+
+
+				<section>
+					<h3>build your own task</h3>
+
+					<pre><code style="font-size: 18px; margin-top: 20px;">
+$ npm init
+					</code></pre>
+
+					<h4>index.js</h4>
+					<pre><code style="font-size: 18px; margin-top: 20px;">
+
+var HelloWorldTasks = function (helloName, preTasks) {
+  this.helloName = helloName;
+  this.preTasks = preTasks;
+
+  var self = this;
+  namespace('hello', function () {
+
+    desc('hello world task');
+    task('world', self.preTasks || [], function () {
+      console.log(self.helloName, 'says Hello World!!');
+    });
+
+    desc('hello melbJS task');
+    task('melbjs', self.preTasks || [], function () {
+      console.log(self.helloName, 'says Hello MelbJS!!');
+    });
+
+  });
+};
+
+exports.helloWorldTasks = HelloWorldTasks;
+					</code></pre>
+				</section>
+
+
+
+				<section>
+					<h3>package the task with npm</h3>
+					<pre><code style="font-size: 18px; margin-top: 20px;">
+$ npm pack
+					</code></pre>
+
+					<h3 class="fragment">install the package</h3>
+					<pre class="fragment"><code style="font-size: 18px; margin-top: 20px;">
+$ npm install jake-hello-world/jake-hello-world-0.0.1.tgz
+					</code></pre>
+
+					<h3 class="fragment">using the task</h3>
+					<pre class="fragment"><code style="font-size: 18px; margin-top: 20px;">
+
+var helloWorldTasks = require('jake-hello-world').helloWorldTasks;
+
+new helloWorldTasks('Fred');
+					</code></pre>
+				</section>
+
+
+
+				<section>
+					<h3>jake in the wild!</h3>
+					<ul>
+						<li class="fragment">run unit tests</li>
+						<li class="fragment">run unit tests with watch &amp; growl</li>
+						<li class="fragment">build iOS application</li>
+						<li class="fragment">run jake on jenkins CI</li>
+					</ul>
+				</section>
+
+
+
+				<section>
+					<h1>THE END</h1>
+					<h3 class="inverted">BY Justin Wark</h3>
+					<h3 class="inverted">twitter: @justinwark</h3>
+					<h3>&nbsp;</h3>
+					<h3 class="inverted">check out:</h3>
+					<ul>
+						<li>https://github.com/mde/jake</li>
+						<li>https://github.com/justmoon/node-jake-uglify</li>
+					</ul>
+				</section>
+
+
+
+			</div>
+
+			<!-- The navigational controls UI -->
+			<aside class="controls">
+				<a class="left" href="#">&#x25C4;</a>
+				<a class="right" href="#">&#x25BA;</a>
+				<a class="up" href="#">&#x25B2;</a>
+				<a class="down" href="#">&#x25BC;</a>
+			</aside>
+
+			<!-- Displays presentation progress, max value changes via JS to reflect # of slides -->
+			<div class="progress"><span></span></div>
+
+		</div>
+
+		<!-- Optional libraries for code syntax highlighting and classList support in IE9 -->
+		<script src="lib/highlight.js"></script>
+		<script src="lib/classList.js"></script>
+
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// Parse the query string into a key/value object
+			var query = {};
+			location.search.replace( /[A-Z0-9]+?=(\w*)/gi, function(a) {
+				query[ a.split( '=' ).shift() ] = a.split( '=' ).pop();
+			} );
+
+			// Fires when a slide with data-state=customevent is activated
+			Reveal.addEventListener( 'customevent', function() {
+				alert( '"customevent" has fired' );
+			} );
+
+			// Fires each time a new slide is activated
+			Reveal.addEventListener( 'slidechanged', function( event ) {
+				// event.previousSlide, event.currentSlide, event.indexh, event.indexv
+			} );
+
+			Reveal.initialize({
+				// Display controls in the bottom right corner
+				controls: true,
+
+				// Display a presentation progress bar
+				progress: true,
+
+				// If true; each slide will be pushed to the browser history
+				history: true,
+
+				// Loops the presentation, defaults to false
+				loop: false,
+
+				// Flags if mouse wheel navigation should be enabled
+				mouseWheel: true,
+
+				// Apply a 3D roll to links on hover
+				rollingLinks: true,
+
+				// UI style
+				theme: query.theme || 'default', // default/neon
+
+				// Transition style
+				transition: query.transition || 'default' // default/cube/page/concave/linear(2d)
+			});
+
+			hljs.initHighlightingOnLoad();
+		</script>
+
+	</body>
+</html>
